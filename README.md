@@ -14,7 +14,7 @@ figures, headlines, event times and prices in this example are invented.
 mkdir -p runs/fundamental-demo
 python ingest.py examples/fundamentals/sources.json --db runs/fundamental-demo/data.db --archived-receipt 2026-11-25T09:40:00+05:30
 SYMBOLS=RELIANCE,HDFCBANK,INFY,ICICIBANK,TCS
-python fixture.py 2026-11-25 "$SYMBOLS" | python solo.py --mode replay --day 2026-11-25 --symbols "$SYMBOLS" --db runs/fundamental-demo/data.db --journal runs/fundamental-demo/session.jsonl
+python fixture.py 2026-11-25 "$SYMBOLS" | python solo.py --mode replay --day 2026-11-25 --symbols "$SYMBOLS" --db runs/fundamental-demo/data.db --wallet runs/fundamental-demo/wallet.sqlite --journal runs/fundamental-demo/session.jsonl
 python -m unittest discover -s tests -v
 ```
 
@@ -48,8 +48,14 @@ replay. Forward collection uses the local UTC receipt time. The agent includes a
 event only once both publication and receipt are at or before the candle close.
 Use an accurate system clock. Run the existing licensed minute feed with the same
 symbols, piping it into `python solo.py --mode forward --day YYYY-MM-DD --symbols
-"$SYMBOLS" --db runs/live.db --journal runs/SESSION.jsonl`. Each session starts with
-₹1 lakh per account. A late or incomplete feed leaves a partial journal without a
+"$SYMBOLS" --db runs/live.db --journal runs/SESSION.jsonl`. The solo trader starts with ₹1,00,000 once. Run from the same checkout or pass
+the same absolute `--wallet` path each day (default `runs/solo-wallet.sqlite`).
+Completed sessions carry cash after fees into the next date. Replay and forward
+balances are separate. The chart-only ledger is a hypothetical comparison and
+adds no buying power. Profits stay on the ledger; new orders are sized against
+the lower of current equity and ₹1 lakh. The existing 80% gross and 20% per-stock
+limits also apply. The daily loss halt uses that session's opening balance.
+A wallet starts a new series and does not import older single-day demo journals. A late or incomplete feed leaves a partial journal without a
 completion record. This release does not send broker orders.
 
 

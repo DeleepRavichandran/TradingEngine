@@ -37,6 +37,7 @@ class Account:
     positions: dict = field(default_factory=dict)
     pending: dict = field(default_factory=dict)
     halted: bool = False
+    capital_ceiling: int | None = None
 
     def __post_init__(self):
         self.cash = self.start
@@ -79,8 +80,9 @@ class Account:
                     n = (lo + hi + 1) // 2
                     cost = charges(n * px, True)
                     post = equity - n * (px - opens[s]) - cost
-                    if (n * px + cost <= self.cash and (held + n) * opens[s] * 5 <= post
-                            and (gross + n * opens[s]) * 5 <= post * 4):
+                    budget = min(post, self.capital_ceiling) if self.capital_ceiling is not None else post
+                    if (n * px + cost <= self.cash and (held + n) * opens[s] * 5 <= budget
+                            and (gross + n * opens[s]) * 5 <= budget * 4):
                         lo = n
                     else:
                         hi = n - 1

@@ -11,6 +11,7 @@ def decide(state):
     last = history[-1]
     breadth = sum(b[3] > history[0][s][0] for s, b in last.items()) / len(last)
     targets, candidates = {}, []
+    analysis = state.get("analysis", {})
     for symbol, bar in last.items():
         rows = [frame[symbol] for frame in history[-31:]]
         price = bar[3]
@@ -24,11 +25,13 @@ def decide(state):
         elif (len(history) < 330 and breadth >= 0.60 and momentum > 0.004
               and recent > mean and rows[-2][3] <= recent < price
               and price * bar[4] >= 100_000_000):
-            candidates.append((momentum / max(noise, 0.0005), symbol, price, noise))
+            factor = analysis.get(symbol, {}).get("entry_multiplier", 1.0)
+            if factor > 0:
+                candidates.append((factor * momentum / max(noise, 0.0005), symbol, price, noise, factor))
     slots = max(0, 4 - len(held))
-    for _, symbol, price, noise in sorted(candidates, reverse=True)[:slots]:
+    for _, symbol, price, noise, factor in sorted(candidates, reverse=True)[:slots]:
         budget = state["equity"] * min(0.18, 0.001 / max(noise * 2, 0.001))
-        targets[symbol] = int(budget // price)
+        targets[symbol] = int(budget * factor // price)
     return targets
 
 

@@ -1,4 +1,58 @@
 # TradingEngine
+
+### Standalone Codex Fundamental Analysis Agent
+
+Run `solo.py` to use the Codex strategy by itself. It receives completed candles,
+financial disclosures, calendar events and headlines. It runs a second copy of
+the same chart strategy with the overlay disabled and records both ledgers.
+The shared contest runner is not involved.
+
+**Try the complete example** (Python 3.10+, from this checkout). All company
+figures, headlines, event times and prices in this example are invented.
+
+```sh
+mkdir -p runs/fundamental-demo
+python ingest.py examples/fundamentals/sources.json --db runs/fundamental-demo/data.db --archived-receipt 2026-11-25T09:40:00+05:30
+SYMBOLS=RELIANCE,HDFCBANK,INFY,ICICIBANK,TCS
+python fixture.py 2026-11-25 "$SYMBOLS" | python solo.py --mode replay --day 2026-11-25 --symbols "$SYMBOLS" --db runs/fundamental-demo/data.db --journal runs/fundamental-demo/session.jsonl
+python -m unittest discover -s tests -v
+```
+
+**Supply your own sources.** Each entry in the JSON configuration has a source
+label, an HTTPS URL or local file under `input`, and a kind. File paths are relative
+to the config. Use a fresh journal filename for every session.
+
+| Kind | Input | Effect on new entries |
+|---|---|---|
+| Filing | XBRL instance with two unsegmented INR duration contexts for the same issuer: current and prior-year comparable period. Configure the issuer symbol, actual public release time, title, both context IDs and the revenue and profit element names. | Veto when revenue falls more than 5% and net margin falls more than two percentage points. Reports expire after 125 days. |
+| Macro | CSV with symbol (or *), title, published, scheduled, impact. Supply actual schedule-announcement timestamps, including a UTC offset. | Pause entries from 15 minutes before through 15 minutes after a known high-impact event. |
+| News | RSS or Atom with timezone-aware publication timestamps. Use a company-specific feed for a company symbol or * for market-wide coverage. | A negative balance of matched English headline phrases in the last 24 hours halves entry sizing. Unmatched headlines carry zero directional weight. |
+| Behaviour | Five-minute price movement with latest volume relative to the preceding 20-minute median. | Halve entry sizing during a high-volume selloff or crowded advance. These are observable proxies; the program cannot measure an investor's emotions. |
+
+These initial thresholds are research assumptions. Existing risk limits and exit
+rules still apply. Empty external coverage leaves the external component neutral.
+The journal records new source events, publication and receipt times, reasons,
+financial ratios, target shares and fills. Each minute also records the chart-only
+target on the fundamental account's **same holdings** to isolate the immediate decision.
+Source configuration, comparable periods and issuer mapping are operator supplied.
+Current support covers numeric XBRL instance facts, dated headline text and calendar
+CSV. PDF/OCR, inline XBRL, automated filing discovery, and full-text sentiment models
+are outside this version.
+
+**Forward collection:** change the config to your authorised sources and run
+`python ingest.py sources.json --db runs/live.db --every 120`. A working public
+headline source is included in `examples/fundamentals/public-news.json`.
+The collector commits each source independently and reports feed errors to stderr.
+Backfilled observations entered with `--archived-receipt` are available only in
+replay. Forward collection uses the local UTC receipt time. The agent includes an
+event only once both publication and receipt are at or before the candle close.
+Use an accurate system clock. Run the existing licensed minute feed with the same
+symbols, piping it into `python solo.py --mode forward --day YYYY-MM-DD --symbols
+"$SYMBOLS" --db runs/live.db --journal runs/SESSION.jsonl`. Each session starts with
+₹1 lakh per account. A late or incomplete feed leaves a partial journal without a
+completion record. This release does not send broker orders.
+
+
 An independent, long-only NSE intraday paper trader and a common referee for a
 Codex vs Claude forward contest. Python 3.10+; standard library only.
 

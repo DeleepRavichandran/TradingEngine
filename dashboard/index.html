@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1012">
+<title>Trade journal · TradingEngine</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="journal.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<header class="mast"><div class="wrap mast-inner">
+  <div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>TradingEngine</div>
+  <div class="paper">Paper account <span aria-hidden="true">/</span> INR</div>
+</div></header>
+<main class="wrap">
+  <div class="heading"><div><div class="eyebrow">Fundamental strategy</div><h1>Trade journal</h1></div>
+    <div class="load"><button id="restore" hidden>Show demo</button><button id="open" class="primary">Open journal</button><input id="file" type="file" accept=".jsonl,.ndjson,.txt,application/x-ndjson" hidden></div>
+  </div>
+  <div id="error" role="alert" hidden></div>
+  <p id="loading" role="status">Loading session…</p>
+  <section id="content" hidden>
+    <div class="strip"><b id="source"></b><span id="date"></span><span id="status"></span></div>
+    <div class="metrics">
+      <article><h2>Session P&amp;L</h2><strong id="pnl"></strong><small id="pct"></small></article>
+      <article><h2>Account equity</h2><strong id="equity"></strong><small id="opening"></small></article>
+      <article><h2>Available cash</h2><strong id="cash"></strong><small id="exposure"></small></article>
+      <article><h2>Execution fees</h2><strong id="fees"></strong><small id="fillcount"></small></article>
+    </div>
+    <div class="middle"><section class="panel performance">
+      <div class="panel-head"><h2>Equity curve</h2><span class="legend">Account value</span></div>
+      <div class="plot" role="img" id="plot"><div class="axis-y"><span></span><span></span><span></span></div>
+        <div class="drawing"><svg viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#75e1bc" stop-opacity=".28"/><stop offset="1" stop-color="#75e1bc" stop-opacity=".015"/></linearGradient></defs><path id="area" fill="url(#fade)"/><path id="line" fill="none" stroke="#75e1bc" stroke-width="2.2" vector-effect="non-scaling-stroke"/></svg></div>
+        <div class="axis-x"><span>09:15</span><span>12:22</span><span>15:30 IST</span></div>
+      </div>
+    </section><section class="panel positions"><div class="panel-head"><h2>Open positions</h2><b id="position-count" class="count"></b></div>
+      <div id="holdings"></div>
+    </section></div>
+    <section class="panel executions"><div class="panel-head"><h2>Executions</h2><label class="select"><span class="sr">Filter executions by side</span><select id="side"><option value="all">All sides</option><option value="buy">Buy only</option><option value="sell">Sell only</option></select></label></div>
+      <div class="scroll"><table><thead><tr><th>Time (IST)</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Fill price</th><th>Fees</th></tr></thead><tbody id="fills"></tbody></table></div>
+      <div class="table-foot" id="table-foot"></div>
+    </section>
+  </section>
+  <footer>Journals open in your browser. All amounts in Indian rupees.</footer>
+</main></body></html>

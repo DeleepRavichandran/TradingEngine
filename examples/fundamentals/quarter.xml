@@ -1,0 +1,8 @@
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:demo="urn:synthetic"><unit id="inr"><measure>iso4217:INR</measure></unit>
+<context id="q2"><entity><identifier scheme="urn:fixture">synthetic-company</identifier></entity><period><startDate>2026-07-01</startDate><endDate>2026-09-30</endDate></period></context>
+<demo:RevenueFromOperations contextRef="q2" unitRef="inr">880</demo:RevenueFromOperations>
+<demo:ProfitLoss contextRef="q2" unitRef="inr">38</demo:ProfitLoss>
+<context id="q2prior"><entity><identifier scheme="urn:fixture">synthetic-company</identifier></entity><period><startDate>2025-07-01</startDate><endDate>2025-09-30</endDate></period></context>
+<demo:RevenueFromOperations contextRef="q2prior" unitRef="inr">1000</demo:RevenueFromOperations>
+<demo:ProfitLoss contextRef="q2prior" unitRef="inr">120</demo:ProfitLoss>
+</xbrl>

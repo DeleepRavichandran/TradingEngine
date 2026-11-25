@@ -1,0 +1,5 @@
+[
+  {"kind":"filing","input":"quarter.xml","symbol":"INFY","source":"SYNTHETIC quarterly disclosure","title":"Illustrative quarterly results","published":"2026-11-25T09:35:00+05:30","current":"q2","prior":"q2prior","revenue_tag":"RevenueFromOperations","profit_tag":"ProfitLoss"},
+  {"kind":"macro","input":"calendar.csv","source":"SYNTHETIC calendar"},
+  {"kind":"news","input":"headlines.xml","symbol":"RELIANCE","source":"SYNTHETIC headlines"}
+]

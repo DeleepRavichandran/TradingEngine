@@ -16,7 +16,7 @@
 </div></header>
 <main class="wrap">
   <div class="heading"><div><div class="eyebrow">Fundamental strategy</div><h1>Trade journal</h1></div>
-    <div class="load"><button id="restore" hidden>Show demo</button><button id="open" class="primary">Open journal</button><input id="file" type="file" accept=".jsonl,.ndjson,.txt,application/x-ndjson" hidden></div>
+    <div class="load"><button id="competition" hidden>Competition account</button><button id="restore">Show demo</button><button id="open" class="primary">Open journal</button><input id="file" type="file" accept=".jsonl,.ndjson,.txt,application/x-ndjson" hidden></div>
   </div>
   <div id="error" role="alert" hidden></div>
   <p id="loading" role="status">Loading session…</p>
@@ -29,7 +29,8 @@
       <article><h2>Execution fees</h2><strong id="fees"></strong><small id="fillcount"></small></article>
     </div>
     <div class="middle"><section class="panel performance">
-      <div class="panel-head"><h2>Equity curve</h2><span class="legend">Account value</span></div>
+      <div class="panel-head"><h2>Equity curve</h2><span class="legend" id="legend">Account value</span></div>
+      <div class="empty" id="no-bars" hidden><strong>Awaiting minute data</strong><p>Open a forward paper journal to see how the account value changes.</p></div>
       <div class="plot" role="img" id="plot"><div class="axis-y"><span></span><span></span><span></span></div>
         <div class="drawing"><svg viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="fade" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#75e1bc" stop-opacity=".28"/><stop offset="1" stop-color="#75e1bc" stop-opacity=".015"/></linearGradient></defs><path id="area" fill="url(#fade)"/><path id="line" fill="none" stroke="#75e1bc" stroke-width="2.2" vector-effect="non-scaling-stroke"/></svg></div>
         <div class="axis-x"><span>09:15</span><span>12:22</span><span>15:30 IST</span></div>

@@ -8,6 +8,7 @@ const clock = n => {
   return String(Math.floor(minutes / 60)).padStart(2,'0') + ':' + String(minutes % 60).padStart(2,'0');
 };
 let state, selectedSource, requestId = 0, etag = '', watching = false;
+const competition = {day:'2026-11-25', opening:10000000};
 const write = (id, value) => { el(id).textContent = value; };
 function error(message) {
   write('error', message);
@@ -55,21 +56,32 @@ function view(data, source) {
   const minutes = data.equity.length-1, equity = data.equity.at(-1), pnl = equity-data.opening;
   const change = pnl > 0 ? '+' : '';
   const totalFees = data.fills.reduce((s,f) => s + f.fees, 0);
-  write('source', source === 'demo' ? 'Synthetic replay' : data.mode === 'forward' ? 'Forward paper' : 'Paper replay');
-  write('date', new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeZone:'UTC'}).format(new Date(data.day+'T00:00:00Z')));
-  write('status', (data.complete ? 'Session closed' : minutes ? 'Partial session' : 'Awaiting first bar') + ' · ' + clock(minutes) + ' IST' + (source === 'watch' && !data.complete ? ' · Auto-refresh' : ''));
+  const allocation = source === 'allocation';
+  const date = new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeZone:'UTC'}).format(new Date(data.day+'T00:00:00Z'));
+  if (allocation) {
+    write('source','Competition opening balance');
+    write('date','Start date · ' + date);
+    write('status','Awaiting forward journal');
+  } else {
+    write('source', source === 'demo' ? 'Synthetic replay' : data.mode === 'forward' ? 'Forward paper' : 'Paper replay');
+    write('date',date);
+    write('status', (data.complete ? 'Session closed' : minutes ? 'Partial session' : 'Awaiting first bar') + ' · ' + clock(minutes) + ' IST' + (source === 'watch' && !data.complete ? ' · Auto-refresh' : ''));
+  }
   write('pnl',change + rupees(pnl)); el('pnl').className = pnl > 0 ? 'pos' : pnl < 0 ? 'neg' : '';
   write('pct', data.opening ? change + (pnl/data.opening*100).toFixed(2)+'% after fees' : 'After fees');
   write('equity', rupees(equity)); write('opening','Opened at ' + rupees(data.opening));
   write('cash', rupees(data.cash)); write('exposure',rupees(equity-data.cash) + ' in positions');
   write('fees',rupees(totalFees)); write('fillcount',data.fills.length+' fills');
-  chart(data.equity); renderFills();
+  el('no-bars').hidden = minutes > 0;
+  el('plot').hidden = el('legend').hidden = minutes === 0;
+  if (minutes) chart(data.equity);
+  renderFills();
   write('position-count',data.positions.length);
   const holdings = el('holdings'); holdings.replaceChildren();
   if (!data.positions.length) {
     const box = document.createElement('div'); box.className = 'empty';
     const title = document.createElement('strong'); title.textContent = 'No open positions';
-    const detail = document.createElement('p'); detail.textContent = data.complete ? 'The account finished the session in cash.' : 'The account is flat at the latest recorded minute.';
+    const detail = document.createElement('p'); detail.textContent = allocation ? 'The opening allocation is entirely in cash.' : data.complete ? 'The account finished the session in cash.' : 'The paper account holds cash.';
     box.append(title,detail); holdings.append(box);
   }
   for (const p of data.positions) {
@@ -80,7 +92,13 @@ function view(data, source) {
     name.append(qty); row.append(name,value); holdings.append(row);
   }
   el('content').hidden = false; el('restore').hidden = source === 'demo';
+  el('competition').hidden = allocation;
   el('loading').hidden = true; error('');
+}
+function showCompetition() {
+  ++requestId; watching = false;
+  const {day, opening} = competition;
+  view({day, opening, cash:opening, equity:[opening], fills:[], positions:[]}, 'allocation');
 }
 async function loadDemo() {
   const ticket = ++requestId; watching = false;
@@ -111,6 +129,7 @@ async function watch() {
 el('side').addEventListener('change', renderFills);
 el('open').onclick = () => el('file').click();
 el('restore').onclick = loadDemo;
+el('competition').onclick = showCompetition;
 el('file').onchange = async () => {
   const file = el('file').files[0]; if (!file) return;
   try {
@@ -120,5 +139,5 @@ el('file').onchange = async () => {
   finally { el('file').value = ''; }
 };
 if (new URLSearchParams(location.search).has('watch')) {
-  watching = true; el('restore').hidden = false; watch();
-} else loadDemo();
+  watching = true; el('competition').hidden = false; watch();
+} else showCompetition();
